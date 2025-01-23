@@ -167,14 +167,18 @@ export default function NewVideoScreen() {
 
 const styles = {
   pageContainer: {
-    minHeight: '100vh',
-    padding: '590px',
+    position: 'fixed',  // Fixes the container to the screen
+    top: 0,  // Aligns it to the top of the screen
+    left: 0,  // Aligns it to the left of the screen
+    width: '100%',  // Takes full width
+    height: '100vh',  // Takes full height of the viewport
+    padding: '0',  // Remove any padding to make it full screen
     backgroundImage: `url(${require('../images/fondo.jpg')})`,  // Fondo de la imagen
     backgroundSize: 'cover',  // Para que cubra toda el área
     backgroundPosition: 'center',  // Para centrar la imagen
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center',  // Centers the content horizontally
+    alignItems: 'center',  // Centers the content vertically
   },
   container: {
     padding: '50px',

@@ -80,7 +80,7 @@ export default function FavouritesScreen({ navigation }) {
         style={{
           flex: 1,
           paddingTop: '120px',
-          paddingBottom: '80px',
+          paddingBottom: '60px',
           background: `url(${fondo}) no-repeat center center fixed`,
           backgroundSize: 'cover',
           overflowY: 'auto',
@@ -111,7 +111,6 @@ export default function FavouritesScreen({ navigation }) {
                   borderRadius: '10px',
                   boxShadow: '0 2px 5px rgba(0, 0, 0, 0.25)',
                   padding: '10px',
-                  width: '300px',
                 }}
               >
                 <VideoCard

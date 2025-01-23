@@ -40,7 +40,7 @@ export const menuSuggestionFlow = onFlow(
     const prompt =
       `Suggest an item for the menu of a ${subject} themed restaurant`;
     const llmResponse = await ai.generate({
-      model: '' /* TODO: Set a model. */,
+      model: "" /* TODO: Set a model. */,
       prompt: prompt,
       config: {
         temperature: 1,
