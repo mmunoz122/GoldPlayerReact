@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../firebaseConfig';
-import { doc, getDoc, getDocs, collection, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { doc, getDoc, setDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import VideoCard from '../CartaDeVideo';
 import FSection from '../FSection';
+import logo from '../images/logo.jpg';
+import fondo from '../images/fondo.jpg';
 
-export default function ListScreen({ navigation }) {
+export default function FavouritesScreen({ navigation }) {
   const [errorMsg, setErrorMsg] = useState(null);
   const [favoriteVideos, setFavoriteVideos] = useState([]);
   const currentUser = auth.currentUser;
@@ -17,7 +19,6 @@ export default function ListScreen({ navigation }) {
           const userDocSnap = await getDoc(userDocRef);
 
           if (userDocSnap.exists()) {
-            // Solo cargamos los vídeos que están en la lista de favoritos
             setFavoriteVideos(userDocSnap.data().favorites || []);
           } else {
             setFavoriteVideos([]);
@@ -58,7 +59,7 @@ export default function ListScreen({ navigation }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      {/* Header fix */}
+      {/* Header */}
       <header
         style={{
           position: 'fixed',
@@ -72,50 +73,64 @@ export default function ListScreen({ navigation }) {
           zIndex: 1000,
         }}
       >
-        <img src={require('../images/logo.jpg')} alt="Logo" style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
+        <img src={logo} alt="Logo" style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
       </header>
 
       <main
         style={{
           flex: 1,
           paddingTop: '120px',
-          paddingBottom: '60px',
-          padding: '580px',
-          background: `url(${require('../images/fondo.jpg')}) no-repeat center center fixed`,
+          paddingBottom: '80px',
+          background: `url(${fondo}) no-repeat center center fixed`,
           backgroundSize: 'cover',
           overflowY: 'auto',
         }}
       >
-        <h3 style={{ color: '#fff', width: '200%' }}>Vídeos favorits:</h3>
+        <h3 style={{ color: '#fff', textAlign: 'center' }}>Vídeos favorits:</h3>
+
+        {errorMsg && (
+          <div style={{ color: '#f00', textAlign: 'center', marginBottom: '20px' }}>
+            {errorMsg}
+          </div>
+        )}
 
         {favoriteVideos.length > 0 ? (
-          [...favoriteVideos].reverse().map((video, index) => (
-            <div
-              key={index}
-              style={{
-                margin: '10px',
-                padding: '10px',
-                backgroundColor: '#9b59b6',
-                borderRadius: '10px',
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.25)',
-              }}
-            >
-              <VideoCard
-                videoUrl={video.url}
-                title={video.title}
-                description={video.description}
-                createdAt={video.createdAt}
-                onToggleFavorite={() => toggleFavorite(video)}
-                isFavorite={true} // Sempre serà un favorit
-              />
-            </div>
-          ))
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '15px',
+              padding: '0 20px',
+            }}
+          >
+            {[...favoriteVideos].reverse().map((video, index) => (
+              <div
+                key={index}
+                style={{
+                  backgroundColor: '#9b59b6',
+                  borderRadius: '10px',
+                  boxShadow: '0 2px 5px rgba(0, 0, 0, 0.25)',
+                  padding: '10px',
+                  width: '300px',
+                }}
+              >
+                <VideoCard
+                  videoUrl={video.url}
+                  title={video.title}
+                  description={video.description}
+                  createdAt={video.createdAt}
+                  onToggleFavorite={() => toggleFavorite(video)}
+                  isFavorite={true}
+                />
+              </div>
+            ))}
+          </div>
         ) : (
           <p style={{ color: '#fff', textAlign: 'center', marginTop: '5px' }}>No tens vídeos favorits.</p>
         )}
       </main>
 
-      {/* Footer fix */}
+      {/* Footer */}
       <footer
         style={{
           position: 'fixed',
