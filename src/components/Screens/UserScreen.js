@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../firebaseConfig'; // Assegura't que les rutes d'importació siguin correctes
+import { auth, db } from '../firebaseConfig'; 
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom'; // Importem useNavigate de react-router-dom
-import FSection from '../FSection'; // Assegura't que aquesta ruta sigui correcta
+import { useNavigate } from 'react-router-dom'; 
+import FSection from '../FSection'; 
 
 export default function UserScreen() {
-  const navigate = useNavigate(); // Hook de React Router per a la navegació
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Efecte per carregar les dades de l'usuari
   useEffect(() => {
     const fetchUserData = async () => {
       if (auth.currentUser) {
@@ -32,7 +31,6 @@ export default function UserScreen() {
     fetchUserData();
   }, []);
 
-  // Funció per guardar els canvis de l'usuari
   const handleSave = async () => {
     if (!username || !password) {
       alert('El nom d’usuari i la contrasenya no poden estar buits.');
@@ -51,39 +49,36 @@ export default function UserScreen() {
     }
   };
 
-  // Funció per tancar la sessió de l'usuari
   const handleLogout = async () => {
-    if (isLoggingOut) return; // Si ja està en procés de tancar la sessió, no fem res
-    setIsLoggingOut(true); // Marquem que estem en procés de logout
+    if (isLoggingOut) return; 
+    setIsLoggingOut(true); 
 
     try {
       await auth.signOut();
-      navigate('/login'); // Redirigim a la pantalla de login després de tancar la sessió
+      navigate('/login'); 
     } catch (error) {
       console.error('Error en tancar la sessió:', error);
       alert('No s’ha pogut tancar la sessió.');
     } finally {
-      setIsLoggingOut(false); // Restableixem l'estat de logout
+      setIsLoggingOut(false); 
     }
   };
 
   return (
     <div style={styles.userScreen}>
-      {/* Header sempre visible */}
+      {/* Header fixat */}
       <header style={styles.header}>
         <img src={require('../images/logo.jpg')} alt="Logo" style={styles.logo} />
       </header>
 
-      {/* Contingut principal */}
+      {/* Contingut principal fixat */}
       <main style={styles.settingsContainer}>
         <h2 style={styles.title}>Configuració d'usuari</h2>
-        {/* Imatge d'usuari */}
         <div style={styles.imageRow}>
           <button style={styles.imageContainer}>👤</button>
           <button style={styles.changeText}>Canviar</button>
         </div>
 
-        {/* Inputs */}
         <div style={styles.inputContainer}>
           <label>Nom d'usuari</label>
           <input value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
@@ -97,14 +92,13 @@ export default function UserScreen() {
           <input value={email} readOnly style={styles.input} />
         </div>
 
-        {/* Botons */}
         <div style={styles.buttonContainer}>
           <button style={styles.saveButton} onClick={handleSave}> Desar canvis </button>
           <button style={styles.logoutButton} onClick={handleLogout}> Tancar sessió </button>
         </div>
       </main>
 
-      {/* Footer sempre visible */}
+      {/* Footer fixat */}
       <footer style={styles.footer}>
         <FSection currentSection={3} onPress={(id) => navigate(id === 1 ? '/list' : id === 2 ? '/favourites' : '/user')} />
       </footer>
@@ -119,29 +113,39 @@ const styles = {
     alignItems: 'center',
     width: '100%',
     background: 'linear-gradient(135deg, #1db9d7, #f94892)',
-    minHeight: '100vh',
+    height: '100vh',
     fontFamily: 'Arial, sans-serif',
+    position: 'relative', // Ensures content stays fixed relative to the parent
   },
   header: {
+    position: 'fixed', // Fix the header at the top
+    top: 0,
+    left: 0,
+    width: '100%',
     height: '80px',
     backgroundColor: '#8e44ad',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
+    zIndex: 1000,
   },
   logo: {
     height: '60px',
   },
   settingsContainer: {
+    position: 'fixed', // Make the settings container fixed
+    top: '80px', // Start below the header
+    left: 530,
+    right: 0,
     backgroundColor: '#f3f8fe',
     borderRadius: '12px',
     padding: '35px',
     boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
     width: '400px',
     textAlign: 'center',
+    top: '80px',
     marginTop: '10px',
-    marginBottom: '2px',
+    justifyContent: 'center',
   },
   title: {
     fontSize: '24px',
@@ -218,12 +222,15 @@ const styles = {
     transition: 'background-color 0.3s ease',
   },
   footer: {
-    padding: '1px',
-    height: '90px',
-    background: 'transparent',
+    position: 'fixed', // Fix the footer at the bottom
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    height: '70px',
+    backgroundColor: '#8e44ad',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
+    zIndex: 1000,
   },
 };
