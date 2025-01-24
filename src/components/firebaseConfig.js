@@ -1,24 +1,26 @@
-// Importem les funcions necessàries des del SDK de Firebase
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+// Importar los servicios necesarios de Firebase
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // Importa Storage
 
-// Configurarem Firebase amb les credencials del projecte
+// Configuración de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBtvar0Dkt40bfe8Ee4Hf4GLdZPsxM52ds", // Clau API del projecte
-  authDomain: "mastervideo-6be22.firebaseapp.com", // Domini d'autenticació
-  projectId: "mastervideo-6be22", // ID del projecte a Firestore
-  storageBucket: "mastervideo-6be22.appspot.com", // Espai d'emmagatzematge
-  messagingSenderId: "643958523627", // ID del servei de missatgeria
-  appId: "1:643958523627:web:0b54a1fa361d71d3ab20ae" // Identificador de l'aplicació
+  apiKey: "AIzaSyBtvar0Dkt40bfe8Ee4Hf4GLdZPsxM52ds",
+  authDomain: "mastervideo-6be22.firebaseapp.com",
+  databaseURL: "https://mastervideo-6be22-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "mastervideo-6be22",
+  storageBucket: "mastervideo-6be22.firebasestorage.app",
+  messagingSenderId: "643958523627",
+  appId: "1:643958523627:web:0b54a1fa361d71d3ab20ae",
+  measurementId: "G-7XFSG58FQT"
 };
 
-// Inicialitzarem l'aplicació de Firebase
+
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 
-// Inicialitzarem els serveis d'Autenticació i Firestore
-const auth = getAuth(app); // Crearem el servei d'autenticació
-const db = getFirestore(app); // Crearem el servei de base de dades Firestore
-
-// Exportarem els serveis per utilitzar-los en altres parts de l'aplicació
-export { auth, db };
+// Exportar los servicios una sola vez
+export const auth = getAuth(app); // Solo una vez
+export const db = getFirestore(app);
+export const storage = getStorage(app); // Exportar Storage

@@ -1,113 +1,157 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../firebaseConfig'; 
+import { auth, db, storage } from '../firebaseConfig';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom'; 
-import FSection from '../FSection'; 
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useNavigate } from 'react-router-dom';
+import FSection from '../FSection';
+import defaultImage from '../images/default_image.jpg';
 
-export default function UserScreen() {
+
+export default function PantallaUsuari() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [nomUsuari, setNomUsuari] = useState('');
+  const [contrasenya, setContrasenya] = useState('');
+  const [correu, setCorreu] = useState('');
+  const [imatgePerfil, setImatgePerfil] = useState(null);
+  const [tancantSessio, setTancantSessio] = useState(false);
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const obtenirDadesUsuari = async () => {
       if (auth.currentUser) {
-        setEmail(auth.currentUser.email);
+        setCorreu(auth.currentUser.email);
         try {
-          const userDocRef = doc(db, 'usuaris', auth.currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUsername(userData.username || '');
-            setPassword(userData.password || '');
+          const refUsuari = doc(db, 'usuaris', auth.currentUser.uid);
+          const dadesUsuari = await getDoc(refUsuari);
+          if (dadesUsuari.exists()) {
+            const dades = dadesUsuari.data();
+            setNomUsuari(dades.nomUsuari || '');
+            setContrasenya(dades.contrasenya || '');
+            setImatgePerfil(dades.imatgePerfil || null);
           }
         } catch (error) {
-          console.error('Error en obtenir les dades de l’usuari:', error);
+          console.error('Error en obtenir les dades de l\'usuari:', error);
         }
       }
     };
-    fetchUserData();
+    obtenirDadesUsuari();
   }, []);
 
-  const handleSave = async () => {
-    if (!username || !password) {
-      alert('El nom d’usuari i la contrasenya no poden estar buits.');
+  const guardarCanvis = async () => {
+    if (!nomUsuari || !contrasenya) {
+      alert('El nom d\'usuari i la contrasenya no poden estar buits.');
       return;
     }
     try {
-      const userDocRef = doc(db, 'usuaris', auth.currentUser.uid);
-      await updateDoc(userDocRef, {
-        username,
-        password
+      const refUsuari = doc(db, 'usuaris', auth.currentUser.uid);
+      await updateDoc(refUsuari, {
+        nomUsuari,
+        contrasenya,
+        imatgePerfil: imatgePerfil || null,
       });
-      alert('Les dades s’han desat correctament.');
+      alert('Els canvis s\'han guardat correctament.');
     } catch (error) {
-      console.error('Error en desar les dades:', error);
-      alert('No s’han pogut desar les dades.');
+      console.error('Error en guardar les dades:', error);
+      alert('No s\'han pogut guardar les dades.');
     }
   };
 
-  const handleLogout = async () => {
-    if (isLoggingOut) return; 
-    setIsLoggingOut(true); 
+  const gestionarCanviImatge = async (e) => {
+    const fitxer = e.target.files[0];
+    if (fitxer && auth.currentUser) {
+      const userId = auth.currentUser.uid;
+      const refStorage = ref(storage, `profilePictures/${userId}`);
+      try {
+        await uploadBytes(refStorage, fitxer);
+        const url = await getDownloadURL(refStorage);
+        setImatgePerfil(url);
+        const refUsuari = doc(db, 'usuaris', userId);
+        await updateDoc(refUsuari, { imatgePerfil: url });
+        alert('La imatge de perfil s\'ha actualitzat correctament!');
+      } catch (error) {
+        console.error('Error en pujar la imatge:', error);
+        alert('Error en pujar la imatge. Torna-ho a intentar.');
+      }
+    } else {
+      alert('No s\'ha trobat l\'usuari. Si us plau, inicia sessió de nou.');
+    }
+  };
+
+  const tancarSessio = async () => {
+    if (tancantSessio) return;
+    setTancantSessio(true);
 
     try {
       await auth.signOut();
-      navigate('/login'); 
+      navigate('/login');
     } catch (error) {
       console.error('Error en tancar la sessió:', error);
-      alert('No s’ha pogut tancar la sessió.');
+      alert('No s\'ha pogut tancar la sessió.');
     } finally {
-      setIsLoggingOut(false); 
+      setTancantSessio(false);
     }
   };
 
   return (
-    <div style={styles.userScreen}>
-      {/* Header fixat */}
-      <header style={styles.header}>
-        <img src={require('../images/logo.jpg')} alt="Logo" style={styles.logo} />
+    <div style={estils.pantallaUsuari}>
+      <header style={estils.capcalera}>
+        <img src={require('../images/logo.jpg')} alt="Logo" style={estils.logo} />
       </header>
 
-      {/* Contingut principal fixat */}
-      <main style={styles.settingsContainer}>
-        <h2 style={styles.title}>Configuració d'usuari</h2>
-        <div style={styles.imageRow}>
-          <button style={styles.imageContainer}>👤</button>
-          <button style={styles.changeText}>Canviar</button>
+      <main style={estils.contenidorConfiguracio}>
+        <h2 style={estils.titol}>Configuració d'Usuari</h2>
+        <div style={estils.filaImatge}>
+        <img
+  src={imatgePerfil || defaultImage}
+  alt="Perfil"
+  style={estils.imatgePerfil}
+/>
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            id="inputImatgePerfil"
+            onChange={gestionarCanviImatge}
+          />
+          <label htmlFor="inputImatgePerfil" style={estils.canviarText}>Canviar</label>
         </div>
 
-        <div style={styles.inputContainer}>
-          <label>Nom d'usuari</label>
-          <input value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
+        <div style={estils.contenidorInput}>
+          <label>Nom d'Usuari</label>
+          <input
+            value={nomUsuari}
+            onChange={(e) => setNomUsuari(e.target.value)}
+            style={estils.input}
+          />
         </div>
-        <div style={styles.inputContainer}>
+        <div style={estils.contenidorInput}>
           <label>Contrasenya</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
+          <input
+            type="password"
+            value={contrasenya}
+            onChange={(e) => setContrasenya(e.target.value)}
+            style={estils.input}
+          />
         </div>
-        <div style={styles.inputContainer}>
-          <label>Email</label>
-          <input value={email} readOnly style={styles.input} />
+        <div style={estils.contenidorInput}>
+          <label>Correu</label>
+          <input value={correu} readOnly style={estils.input} />
         </div>
 
-        <div style={styles.buttonContainer}>
-          <button style={styles.saveButton} onClick={handleSave}> Desar canvis </button>
-          <button style={styles.logoutButton} onClick={handleLogout}> Tancar sessió </button>
+        <div style={estils.contenidorBotons}>
+          <button style={estils.botoGuardar} onClick={guardarCanvis}>Guardar Canvis</button>
+          <button style={estils.botoTancarSessio} onClick={tancarSessio}>Tancar Sessió</button>
         </div>
       </main>
 
-      {/* Footer fixat */}
-      <footer style={styles.footer}>
+      <footer style={estils.peuDePagina}>
         <FSection currentSection={3} onPress={(id) => navigate(id === 1 ? '/list' : id === 2 ? '/favourites' : '/user')} />
       </footer>
     </div>
   );
 }
 
-const styles = {
-  userScreen: {
+const estils = {
+  pantallaUsuari: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -115,10 +159,10 @@ const styles = {
     background: 'linear-gradient(135deg, #1db9d7, #f94892)',
     height: '100vh',
     fontFamily: 'Arial, sans-serif',
-    position: 'relative', // Ensures content stays fixed relative to the parent
+    position: 'relative',
   },
-  header: {
-    position: 'fixed', // Fix the header at the top
+  capcalera: {
+    position: 'fixed',
     top: 0,
     left: 0,
     width: '100%',
@@ -132,53 +176,46 @@ const styles = {
   logo: {
     height: '60px',
   },
-  settingsContainer: {
-    position: 'fixed', // Make the settings container fixed
-    top: '80px', // Start below the header
-    left: 530,
-    right: 0,
+  contenidorConfiguracio: {
+    position: 'fixed',
+    top: '80px',
+    left: '50%',
+    transform: 'translateX(-50%)',
     backgroundColor: '#f3f8fe',
     borderRadius: '12px',
     padding: '35px',
     boxShadow: '0 8px 20px rgba(0, 0, 0, 0.2)',
     width: '400px',
     textAlign: 'center',
-    top: '80px',
     marginTop: '10px',
-    justifyContent: 'center',
   },
-  title: {
+  titol: {
     fontSize: '24px',
     color: '#34495e',
     marginBottom: '20px',
   },
-  imageRow: {
+  filaImatge: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: '20px',
   },
-  imageContainer: {
+  imatgePerfil: {
     width: '70px',
     height: '70px',
     borderRadius: '50%',
-    backgroundColor: '#e3e3e3',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    fontSize: '32px',
-    color: '#555',
+    objectFit: 'cover',
     border: '2px solid #ddd',
-    marginRight: '10px',
     cursor: 'pointer',
   },
-  changeText: {
+  canviarText: {
     fontSize: '14px',
     color: '#007bff',
     textDecoration: 'underline',
     cursor: 'pointer',
+    marginLeft: '10px',
   },
-  inputContainer: {
+  contenidorInput: {
     marginBottom: '15px',
     textAlign: 'left',
   },
@@ -193,13 +230,13 @@ const styles = {
     backgroundColor: '#fff',
     boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)',
   },
-  buttonContainer: {
+  contenidorBotons: {
     display: 'flex',
     flexDirection: 'column',
     gap: '15px',
     marginTop: '20px',
   },
-  saveButton: {
+  botoGuardar: {
     padding: '12px 20px',
     fontSize: '16px',
     fontWeight: 'bold',
@@ -210,7 +247,7 @@ const styles = {
     color: '#fff',
     transition: 'background-color 0.3s ease',
   },
-  logoutButton: {
+  botoTancarSessio: {
     padding: '12px 20px',
     fontSize: '16px',
     fontWeight: 'bold',
@@ -221,8 +258,8 @@ const styles = {
     color: '#fff',
     transition: 'background-color 0.3s ease',
   },
-  footer: {
-    position: 'fixed', // Fix the footer at the bottom
+  peuDePagina: {
+    position: 'fixed',
     bottom: 0,
     left: 0,
     width: '100%',
