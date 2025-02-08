@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig'; // Importamos Firestore
+import { doc, setDoc } from 'firebase/firestore';
 import { styles } from '../Styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,7 +11,7 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [selectedButton, setSelectedButton] = useState('register'); // Añadido para el estado de los botones
+  const [selectedButton, setSelectedButton] = useState('register');
   const navigate = useNavigate();
 
   const handleRegister = async () => {
@@ -28,8 +29,18 @@ export default function RegisterScreen() {
     setErrorMsg(null);
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigate('/login'); // Redirigir a la página de login
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Guardar datos en Firestore
+      await setDoc(doc(db, 'usuaris', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        password: password,
+        createdAt: new Date()
+      });
+      
+      navigate('/login');
     } catch (error) {
       setErrorMsg('Error en registrar-se. Comprova les teves dades.');
     } finally {
@@ -56,7 +67,7 @@ export default function RegisterScreen() {
             }}
             onClick={() => {
               setSelectedButton('login');
-              navigate('/login'); // Usar navigate para redirigir a la pantalla de login
+              navigate('/login');
             }}
           >
             Iniciar sessió
@@ -67,16 +78,14 @@ export default function RegisterScreen() {
               ...styles.headerButton,
               ...(selectedButton === 'register' ? styles.headerButtonSelected : {}),
             }}
-            onClick={() => {
-              setSelectedButton('register');
-            }}
+            onClick={() => setSelectedButton('register')}
           >
             Registrar-se
           </button>
         </div>
 
         <h2 style={styles.title}>Crea el teu compte</h2>
-
+        
         {errorMsg && <p style={styles.errorText}>{errorMsg}</p>}
 
         <input
@@ -110,7 +119,7 @@ export default function RegisterScreen() {
         <br />
         <p
           style={{ color: 'blue', fontWeight: 'bold', cursor: 'pointer' }}
-          onClick={() => navigate('/login')} // Corregido para que redirija correctamente a login
+          onClick={() => navigate('/login')}
         >
           Ja tens compte? Inicia sessió
         </p>

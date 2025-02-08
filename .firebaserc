@@ -1,5 +1,11 @@
 {
   "projects": {
     "default": "mastervideo-6be22"
+  },
+  "targets": {},
+  "etags": {
+    "mastervideo-6be22": {
+      "extensionInstances": {}
+    }
   }
 }

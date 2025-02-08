@@ -23,7 +23,7 @@ export default function NewVideoScreen() {
       }
 
       try {
-        const listsCollectionRef = collection(db, 'usuaris', currentUser.uid, 'llistes');
+        const listsCollectionRef = collection(db, 'videos', currentUser.uid, 'llistes');
         const listsSnapshot = await getDocs(listsCollectionRef);
 
         if (!listsSnapshot.empty) {
@@ -48,7 +48,7 @@ export default function NewVideoScreen() {
     }
 
     try {
-      const listRef = doc(db, 'usuaris', currentUser.uid, 'llistes', newListName);
+      const listRef = doc(db, 'videos', currentUser.uid, 'llistes', newListName);
       await setDoc(listRef, { videos: [] });
 
       setUserLists(prevLists => [...prevLists, newListName]);
@@ -78,7 +78,7 @@ export default function NewVideoScreen() {
         createdAt: new Date().toISOString(),
       };
 
-      const listDocRef = doc(db, 'usuaris', currentUser.uid, 'llistes', selectedList);
+      const listDocRef = doc(db, 'videos', currentUser.uid, 'llistes', selectedList);
 
       await updateDoc(listDocRef, {
         videos: arrayUnion(video),

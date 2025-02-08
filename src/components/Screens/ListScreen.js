@@ -18,7 +18,7 @@ export default function ListScreen({ navigation }) {
     if (currentUser) {
       const fetchUserData = async () => {
         try {
-          const llistesCollectionRef = collection(db, 'usuaris', currentUser.uid, 'llistes');
+          const llistesCollectionRef = collection(db, 'videos', currentUser.uid, 'llistes');
           const llistesSnapshot = await getDocs(llistesCollectionRef);
 
           if (!llistesSnapshot.empty) {
@@ -28,7 +28,7 @@ export default function ListScreen({ navigation }) {
             setUserllistes([]);
           }
 
-          const userDocRef = doc(db, 'usuaris', currentUser.uid);
+          const userDocRef = doc(db, 'videos', currentUser.uid);
           const userDocSnap = await getDoc(userDocRef);
 
           if (userDocSnap.exists()) {
@@ -54,7 +54,7 @@ export default function ListScreen({ navigation }) {
         try {
           const combinedVideos = [];
           for (const list of selectedLists) {
-            const listDocRef = doc(db, 'usuaris', currentUser.uid, 'llistes', list);
+            const listDocRef = doc(db, 'videos', currentUser.uid, 'llistes', list);
             const listDocSnap = await getDoc(listDocRef);
 
             if (listDocSnap.exists()) {
@@ -76,7 +76,7 @@ export default function ListScreen({ navigation }) {
   }, [selectedLists, currentUser]);
 
   const toggleFavorite = async (video) => {
-    const userDocRef = doc(db, 'usuaris', currentUser.uid);
+    const userDocRef = doc(db, 'videos', currentUser.uid);
     const isFavorite = favoriteVideos.some(fav => fav.url === video.url);
 
     try {
@@ -136,7 +136,7 @@ export default function ListScreen({ navigation }) {
         try {
           // Recorremos todas las listas seleccionadas
           for (const list of selectedLists) {
-            const listDocRef = doc(db, 'usuaris', currentUser.uid, 'llistes', list);
+            const listDocRef = doc(db, 'videos', currentUser.uid, 'llistes', list);
 
             // Obtenemos los documentos de la lista
             const listDocSnap = await getDoc(listDocRef);
@@ -156,7 +156,7 @@ export default function ListScreen({ navigation }) {
                   videos: arrayRemove(...videosToDelete) 
                 }, { merge: true });
 // También eliminamos los videos de los favoritos
-const favoritesDocRef = doc(db, 'usuaris', currentUser.uid);
+const favoritesDocRef = doc(db, 'videos', currentUser.uid);
 const favoritesDocSnap = await getDoc(favoritesDocRef);
 
 if (favoritesDocSnap.exists()) {
@@ -177,7 +177,7 @@ if (favoritesDocSnap.exists()) {
 }
 
                 // Eliminamos los videos también de la colección del usuario
-                const userDocRef = doc(db, 'usuaris', currentUser.uid);
+                const userDocRef = doc(db, 'videos', currentUser.uid);
                 await setDoc(userDocRef, { 
                   videos: arrayRemove(...videosToDelete) 
                 }, { merge: true });

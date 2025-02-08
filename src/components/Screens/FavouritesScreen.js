@@ -15,7 +15,7 @@ export default function FavouritesScreen({ navigation }) {
     if (currentUser) {
       const fetchUserData = async () => {
         try {
-          const userDocRef = doc(db, 'usuaris', currentUser.uid);
+          const userDocRef = doc(db, 'videos', currentUser.uid);
           const userDocSnap = await getDoc(userDocRef);
 
           if (userDocSnap.exists()) {
@@ -34,7 +34,7 @@ export default function FavouritesScreen({ navigation }) {
   }, [currentUser]);
 
   const toggleFavorite = async (video) => {
-    const userDocRef = doc(db, 'usuaris', currentUser.uid);
+    const userDocRef = doc(db, 'videos', currentUser.uid);
     const isFavorite = favoriteVideos.some(fav => fav.url === video.url);
 
     try {
